@@ -1,4 +1,5 @@
 const yaml = require("js-yaml");
+const pluginSass = require("eleventy-plugin-sass");
 const { DateTime } = require("luxon");
 const syntaxHighlight = require("@11ty/eleventy-plugin-syntaxhighlight");
 
@@ -25,27 +26,25 @@ module.exports = function (eleventyConfig) {
     yaml.safeLoad(contents)
   );
 
-  // Add Tailwind Output CSS as Watch Target
-  eleventyConfig.addWatchTarget("./_tmp/static/css/style.css");
-
-  // Copy Static Files to /_Site
-  eleventyConfig.addPassthroughCopy({
-    "./_tmp/static/css/style.css": "./static/css/style.css",
-    "./src/admin/config.yml": "./admin/config.yml",
-    "./node_modules/alpinejs/dist/alpine.js": "./static/js/alpine.js",
-    "./node_modules/prismjs/themes/prism-tomorrow.css":
-      "./static/css/prism-tomorrow.css",
+  eleventyConfig.addPlugin(pluginSass, {
+    watch: ['src/static/styles/**/*.scss', '!node_modules/**'],
   });
 
-  // Copy Image Folder to /_site
-  eleventyConfig.addPassthroughCopy("./src/static/img");
+
+  // Copy Static Files to /_Site
+  eleventyConfig.addPassthroughCopy("src");
 
   // Let Eleventy transform HTML files as nunjucks
   // So that we can use .html instead of .njk
   return {
-    dir: {
-      input: "src",
-    },
+    addPassthroughCopy: true,
     htmlTemplateEngine: "njk",
+    templateFormats: ["html", "njk", "md"],
+    dir: {
+      input: 'src',
+      output: '_site',
+      includes: '_includes',
+      data: '_data',
+    },
   };
 };
